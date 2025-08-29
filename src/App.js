@@ -6,7 +6,7 @@ import FollowUp from "./components/FollowUp";
 import Dashboard from "./components/Dashboard";
 
 function App() {
-  const [profile, setProfile] = useState(localStorage.getItem("profile") || "trainers");
+  const [profile, setProfile] = useState(localStorage.getItem("profile") || "Trainers");
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleProfileChange = (newProfile) => {
@@ -19,15 +19,14 @@ function App() {
       <div className="min-h-screen bg-gray-900 flex flex-col overflow-x-hidden">
         {/* Navbar */}
         <nav className="bg-gray-800 text-gray-200 p-4 flex justify-between items-center shadow-md">
-          {/* Logo or Home */}
           <div className="text-white font-bold text-lg">Dashboard</div>
 
           {/* Desktop Links */}
           <div className="hidden md:flex space-x-4">
-            <Link to="/dashboard" className="bg-indigo-600 hover:bg-indigo-800 text-white px-3 py-2 rounded-md transition">
+            <Link to="/" className="bg-indigo-600 hover:bg-indigo-800 text-white px-3 py-2 rounded-md transition">
               Home
             </Link>
-            <Link to="/" className="bg-indigo-600 hover:bg-indigo-800 text-white px-3 py-2 rounded-md transition">
+            <Link to="/addClient" className="bg-indigo-600 hover:bg-indigo-800 text-white px-3 py-2 rounded-md transition">
               Add Client
             </Link>
             <Link to="/clients" className="bg-indigo-600 hover:bg-indigo-800 text-white px-3 py-2 rounded-md transition">
@@ -72,10 +71,10 @@ function App() {
         {/* Mobile Menu */}
         {menuOpen && (
           <div className="md:hidden bg-gray-800 text-gray-200 flex flex-col space-y-2 p-4">
-            <Link to="/dashboard" className="bg-indigo-600 hover:bg-indigo-800 text-white px-3 py-2 rounded-md transition">
+            <Link to="/" className="bg-indigo-600 hover:bg-indigo-800 text-white px-3 py-2 rounded-md transition">
               Home
             </Link>
-            <Link to="/" className="bg-indigo-600 hover:bg-indigo-800 text-white px-3 py-2 rounded-md transition">
+            <Link to="/addClient" className="bg-indigo-600 hover:bg-indigo-800 text-white px-3 py-2 rounded-md transition">
               Add Client
             </Link>
             <Link to="/clients" className="bg-indigo-600 hover:bg-indigo-800 text-white px-3 py-2 rounded-md transition">
@@ -99,8 +98,8 @@ function App() {
         {/* Content */}
         <div className="flex-1 p-6">
           <Routes>
-            <Route path="/addClinet" element={<AddClient profile={profile} />} />
             <Route path="/" element={<Dashboard profile={profile} />} />
+            <Route path="/addClient" element={<AddClient profile={profile} />} />
             <Route path="/clients" element={<ClientList profile={profile} />} />
             <Route path="/followup" element={<FollowUp profile={profile} />} />
           </Routes>
