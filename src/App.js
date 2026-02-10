@@ -4,6 +4,7 @@ import AddClient from "./components/AddClient";
 import ClientList from "./components/ClientList";
 import FollowUp from "./components/FollowUp";
 import Dashboard from "./components/Dashboard";
+import BulkImport from "./components/BulkImport";
 
 function App() {
   const [profile, setProfile] = useState(localStorage.getItem("profile") || "Trainers");
@@ -102,6 +103,7 @@ function App() {
             <Route path="/addClient" element={<AddClient profile={profile} />} />
             <Route path="/clients" element={<ClientList profile={profile} />} />
             <Route path="/followup" element={<FollowUp profile={profile} />} />
+            <Route path="/bulk-import" element={<BulkImport profile={profile} />} />
           </Routes>
         </div>
       </div>
