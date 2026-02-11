@@ -2,91 +2,6 @@ import React, { useState, useEffect } from "react";
 import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "../firebase";
 
-// Helper component for expanded client details
-function ExpandedDetails({ client, formatDate }) {
-  return (
-    <div className="mt-4 ml-7 p-4 bg-gray-900 rounded-lg space-y-3">
-      {/* Social Media Links */}
-      <div>
-        <div className="text-xs font-semibold text-indigo-400 mb-2">Social Media & Contact</div>
-        <div className="space-y-2">
-          {client.instagramUrl && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500 w-24">Instagram:</span>
-              <a href={client.instagramUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-400 hover:underline truncate">
-                {client.instagramUrl}
-              </a>
-            </div>
-          )}
-          {client.linkedinUrl && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500 w-24">LinkedIn:</span>
-              <a href={client.linkedinUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-400 hover:underline truncate">
-                {client.linkedinUrl}
-              </a>
-            </div>
-          )}
-          {client.facebookUrl && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500 w-24">Facebook:</span>
-              <a href={client.facebookUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-400 hover:underline truncate">
-                {client.facebookUrl}
-              </a>
-            </div>
-          )}
-          {client.email && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500 w-24">Email:</span>
-              <span className="text-sm text-gray-300">{client.email}</span>
-            </div>
-          )}
-          {client.websiteUrl && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500 w-24">Website:</span>
-              <a href={client.websiteUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-400 hover:underline truncate">
-                {client.websiteUrl}
-              </a>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Other URLs */}
-      {client.otherUrls && client.otherUrls.length > 0 && (
-        <div>
-          <div className="text-xs font-semibold text-indigo-400 mb-2">Other URLs</div>
-          <div className="space-y-1">
-            {client.otherUrls.map((url, idx) => (
-              <a key={idx} href={url} target="_blank" rel="noreferrer" className="block text-sm text-blue-400 hover:underline truncate">
-                {url}
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Metadata */}
-      <div>
-        <div className="text-xs font-semibold text-indigo-400 mb-2">Details</div>
-        <div className="text-xs text-gray-500 space-y-1">
-          <div>Found on: {client.foundOn || 'Instagram'}</div>
-          <div>Added: {formatDate(client.addedAt)}</div>
-          {client.addedVia && <div>Source: {client.addedVia === 'bulk' ? 'Bulk Import' : 'Manual'}</div>}
-          {client.followerCount > 0 && <div>Followers: {client.followerCount.toLocaleString()}</div>}
-        </div>
-      </div>
-
-      {/* Notes */}
-      {client.notes && (
-        <div>
-          <div className="text-xs font-semibold text-indigo-400 mb-2">Notes</div>
-          <p className="text-sm text-gray-400 italic">{client.notes}</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
 function ClientList({ profile }) {
   const [clients, setClients] = useState({
     notSent: [],
@@ -380,7 +295,86 @@ function ClientList({ profile }) {
                   </div>
 
                   {/* Expanded Details */}
-                  {isExpanded && <ExpandedDetails client={client} formatDate={formatDate} />}
+                  {isExpanded && (
+                    <div className="mt-4 ml-7 p-4 bg-gray-900 rounded-lg space-y-3">
+                      {/* Social Media Links */}
+                      <div>
+                        <div className="text-xs font-semibold text-indigo-400 mb-2">Social Media & Contact</div>
+                        <div className="space-y-2">
+                          {client.instagramUrl && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-500 w-24">Instagram:</span>
+                              <a href={client.instagramUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-400 hover:underline truncate">
+                                {client.instagramUrl}
+                              </a>
+                            </div>
+                          )}
+                          {client.linkedinUrl && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-500 w-24">LinkedIn:</span>
+                              <a href={client.linkedinUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-400 hover:underline truncate">
+                                {client.linkedinUrl}
+                              </a>
+                            </div>
+                          )}
+                          {client.facebookUrl && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-500 w-24">Facebook:</span>
+                              <a href={client.facebookUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-400 hover:underline truncate">
+                                {client.facebookUrl}
+                              </a>
+                            </div>
+                          )}
+                          {client.email && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-500 w-24">Email:</span>
+                              <span className="text-sm text-gray-300">{client.email}</span>
+                            </div>
+                          )}
+                          {client.websiteUrl && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-500 w-24">Website:</span>
+                              <a href={client.websiteUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-400 hover:underline truncate">
+                                {client.websiteUrl}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Other URLs */}
+                      {client.otherUrls && client.otherUrls.length > 0 && (
+                        <div>
+                          <div className="text-xs font-semibold text-indigo-400 mb-2">Other URLs</div>
+                          <div className="space-y-1">
+                            {client.otherUrls.map((url, idx) => (
+                              <a key={idx} href={url} target="_blank" rel="noreferrer" className="block text-sm text-blue-400 hover:underline truncate">
+                                {url}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Metadata */}
+                      <div>
+                        <div className="text-xs font-semibold text-indigo-400 mb-2">Details</div>
+                        <div className="text-xs text-gray-500 space-y-1">
+                          <div>Found on: {client.foundOn || 'Instagram'}</div>
+                          <div>Added: {formatDate(client.addedAt)}</div>
+                          {client.addedVia && <div>Source: {client.addedVia === 'bulk' ? 'Bulk Import' : 'Manual'}</div>}
+                        </div>
+                      </div>
+
+                      {/* Notes */}
+                      {client.notes && (
+                        <div>
+                          <div className="text-xs font-semibold text-indigo-400 mb-2">Notes</div>
+                          <p className="text-sm text-gray-400 italic">{client.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
               );
