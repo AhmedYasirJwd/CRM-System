@@ -100,6 +100,9 @@ function ClientList({ profile }) {
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const [showDeclined, setShowDeclined] = useState(false);
   const [expandedClients, setExpandedClients] = useState(new Set());
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingClient, setEditingClient] = useState(null);
+  const [editFormData, setEditFormData] = useState({});
 
   useEffect(() => {
     if (!profile) return;
@@ -255,6 +258,86 @@ function ClientList({ profile }) {
     });
   };
 
+  const openEditModal = (client) => {
+    setEditingClient(client);
+    setEditFormData({
+      name: client.name || "",
+      location: client.location || "",
+      size: client.size || "Mid",
+      instagramUrl: client.instagramUrl || "",
+      linkedinUrl: client.linkedinUrl || "",
+      facebookUrl: client.facebookUrl || "",
+      email: client.email || "",
+      websiteUrl: client.websiteUrl || "",
+      otherUrls: client.otherUrls || [""],
+      platforms: client.platforms || ["Instagram"],
+      notes: client.notes || ""
+    });
+    setShowEditModal(true);
+  };
+
+  const handleEditChange = (field, value) => {
+    setEditFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleEditPlatformToggle = (platform) => {
+    setEditFormData(prev => {
+      const platforms = prev.platforms || [];
+      if (platforms.includes(platform)) {
+        return { ...prev, platforms: platforms.filter(p => p !== platform) };
+      } else {
+        return { ...prev, platforms: [...platforms, platform] };
+      }
+    });
+  };
+
+  const handleEditOtherUrlChange = (index, value) => {
+    setEditFormData(prev => {
+      const newUrls = [...(prev.otherUrls || [])];
+      newUrls[index] = value;
+      return { ...prev, otherUrls: newUrls };
+    });
+  };
+
+  const addEditOtherUrl = () => {
+    setEditFormData(prev => ({
+      ...prev,
+      otherUrls: [...(prev.otherUrls || []), ""]
+    }));
+  };
+
+  const removeEditOtherUrl = (index) => {
+    setEditFormData(prev => ({
+      ...prev,
+      otherUrls: (prev.otherUrls || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingClient) return;
+
+    try {
+      const clientRef = doc(db, `clients_${profile}`, editingClient.id);
+      
+      const updates = {
+        ...editFormData,
+        otherUrls: editFormData.otherUrls.filter(url => url.trim() !== ""),
+        lastUpdated: Timestamp.now()
+      };
+
+      await updateDoc(clientRef, updates);
+      
+      setShowEditModal(false);
+      setEditingClient(null);
+      setEditFormData({});
+      
+      alert("✅ Client updated successfully!");
+    } catch (error) {
+      console.error("Error updating client:", error);
+      alert("❌ Error updating client. Please try again.");
+    }
+  };
+
   const getSizeBadgeColor = (size) => {
     switch (size) {
       case "High": return "bg-purple-500";
@@ -371,12 +454,20 @@ function ClientList({ profile }) {
                       </div>
                     </div>
                     
-                    <button
-                      onClick={() => openMarkSentModal(client, true)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded font-semibold"
-                    >
-                      Mark as Sent
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => openEditModal(client)}
+                        className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded font-semibold"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        onClick={() => openMarkSentModal(client, true)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded font-semibold"
+                      >
+                        Mark as Sent
+                      </button>
+                    </div>
                   </div>
 
                   {/* Expanded Details */}
@@ -413,6 +504,12 @@ function ClientList({ profile }) {
                   </div>
                   
                   <div className="flex gap-2">
+                    <button
+                      onClick={() => openEditModal(client)}
+                      className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      ✏️ Edit
+                    </button>
                     <button
                       onClick={() => handleMoveToInConvo(client.id)}
                       className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
@@ -500,12 +597,20 @@ function ClientList({ profile }) {
                     </span>
                   </div>
                   
-                  <button
-                    onClick={() => handleMoveToDeclined(client.id)}
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Mark as Declined
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openEditModal(client)}
+                      className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      onClick={() => handleMoveToDeclined(client.id)}
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Mark as Declined
+                    </button>
+                  </div>
                 </div>
 
                 {client.lastContactDate && (
@@ -569,12 +674,20 @@ function ClientList({ profile }) {
                       )}
                     </div>
                     
-                    <button
-                      onClick={() => handleDeleteClient(client.id)}
-                      className="bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Delete Permanently
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => openEditModal(client)}
+                        className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClient(client.id)}
+                        className="bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Delete Permanently
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -635,6 +748,177 @@ function ClientList({ profile }) {
                 className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Client Modal */}
+      {showEditModal && editingClient && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full m-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-2xl font-bold mb-4 text-gray-100">✏️ Edit Client</h3>
+            
+            <div className="space-y-4">
+              {/* Basic Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-indigo-400 mb-2">Name *</label>
+                  <input
+                    type="text"
+                    value={editFormData.name || ""}
+                    onChange={(e) => handleEditChange('name', e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-indigo-400 mb-2">Location *</label>
+                  <input
+                    type="text"
+                    value={editFormData.location || ""}
+                    onChange={(e) => handleEditChange('location', e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* Size */}
+              <div>
+                <label className="block text-sm font-semibold text-indigo-400 mb-2">Size</label>
+                <select
+                  value={editFormData.size || "Mid"}
+                  onChange={(e) => handleEditChange('size', e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="Low">🔵 Low (&lt;10k followers)</option>
+                  <option value="Mid">🟡 Mid (10k-100k followers)</option>
+                  <option value="High">🔴 High (100k+ followers)</option>
+                </select>
+              </div>
+
+              {/* Social Media URLs */}
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-indigo-400">Social Media & Contact</label>
+                
+                <input
+                  type="text"
+                  placeholder="Instagram URL"
+                  value={editFormData.instagramUrl || ""}
+                  onChange={(e) => handleEditChange('instagramUrl', e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                
+                <input
+                  type="text"
+                  placeholder="LinkedIn URL"
+                  value={editFormData.linkedinUrl || ""}
+                  onChange={(e) => handleEditChange('linkedinUrl', e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                
+                <input
+                  type="text"
+                  placeholder="Facebook URL"
+                  value={editFormData.facebookUrl || ""}
+                  onChange={(e) => handleEditChange('facebookUrl', e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={editFormData.email || ""}
+                  onChange={(e) => handleEditChange('email', e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                
+                <input
+                  type="text"
+                  placeholder="Website URL"
+                  value={editFormData.websiteUrl || ""}
+                  onChange={(e) => handleEditChange('websiteUrl', e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* Other URLs */}
+              <div>
+                <label className="block text-sm font-semibold text-indigo-400 mb-2">Other URLs</label>
+                {(editFormData.otherUrls || [""]).map((url, index) => (
+                  <div key={index} className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      placeholder="https://twitter.com/..."
+                      value={url}
+                      onChange={(e) => handleEditOtherUrlChange(index, e.target.value)}
+                      className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    {(editFormData.otherUrls || []).length > 1 && (
+                      <button
+                        onClick={() => removeEditOtherUrl(index)}
+                        className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  onClick={addEditOtherUrl}
+                  className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded text-sm"
+                >
+                  + Add URL
+                </button>
+              </div>
+
+              {/* Platforms */}
+              <div>
+                <label className="block text-sm font-semibold text-indigo-400 mb-2">Platforms</label>
+                <div className="flex flex-wrap gap-3">
+                  {["Instagram", "LinkedIn", "Facebook", "Email", "WhatsApp"].map((platform) => (
+                    <label key={platform} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={(editFormData.platforms || []).includes(platform)}
+                        onChange={() => handleEditPlatformToggle(platform)}
+                        className="w-4 h-4 text-indigo-600 bg-gray-700 border-gray-600 rounded focus:ring-indigo-500"
+                      />
+                      <span className="text-gray-200">{platform}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-sm font-semibold text-indigo-400 mb-2">Notes</label>
+                <textarea
+                  value={editFormData.notes || ""}
+                  onChange={(e) => handleEditChange('notes', e.target.value)}
+                  rows="3"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                />
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingClient(null);
+                  setEditFormData({});
+                }}
+                className="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded font-semibold"
+              >
+                Save Changes
               </button>
             </div>
           </div>
