@@ -7,7 +7,7 @@ const Dashboard = ({ profile }) => {
   const [tmonthClients, setTmonthClients] = useState([]);
   const [last7Days, setLast7Days] = useState([]);
 
-  const MONTHLY_TARGET = 1950;
+  const MONTHLY_TARGET = 4500;
   const DAILY_TARGET = Math.round(MONTHLY_TARGET / 30);
 
   useEffect(() => {
